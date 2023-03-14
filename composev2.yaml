@@ -7,6 +7,12 @@ services:
     container_name: mauticdb
     volumes:
       - mautic2/mysql_data:/var/lib/mysql
+    deploy:
+      update_config:
+        #Inicia o container e depois deleta o antigo
+        order: start-first
+        #Em falha, volta para o último estado funcional
+        failure_action: rollback
     environment:
       - MYSQL_ROOT_PASSWORD=mysecret
     command:
@@ -17,14 +23,20 @@ services:
   mautic:
     image: mautic/mautic:latest
     container_name: mautic
-    links:
-      - mauticdb:mysql
+
     depends_on:
       - mauticdb
     ports:
       - 8081:80
     volumes:
       - mautic2/mautic_data:/var/www/html
+    
+    deploy:
+      update_config:
+        #Inicia o container e depois deleta o antigo
+        order: start-first
+        #Em falha, volta para o último estado funcional
+        failure_action: rollback
     environment:
       - MAUTIC_DB_HOST=mauticdb
       - MYSQL_PORT_3306_TCP=3306
